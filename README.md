@@ -2,8 +2,8 @@
 Automated agent for OSSEC and NAGIOS (currently working on OSSEC)
 
 ## Naming conventions:
-**OSSEC server** The system where all the logs will get aggregated and monitored.
-**OSSEC client** The devices in network which are being monitored by OSSEC.
+**OSSEC server** The system where all the logs will get aggregated and monitored.  
+**OSSEC client** The devices in network which are being monitored by OSSEC.  
 **Client** The analogical organisation using this automated agent.
 
 ## System Goal/Objective:
