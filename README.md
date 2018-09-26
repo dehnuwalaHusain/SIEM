@@ -10,6 +10,4 @@ Automated agent for OSSEC and NAGIOS (currently working on OSSEC)
 To create an automated agent that will run on the `client`'s `OSSEC server`, providing a webUI wherein `client` enters the necessary credientials of all the `OSSEC client` devices that need to be monitored for threats in his/her network.
 Once `install` is initiated via webUI, scripts from `Installation` repo must execute on the IP provided by `client`.
 
-*More details on scripts in the 
-      SIEM/Installation/README.md
-    *
+*More details on scripts in the* SIEM/Installation/README.md
