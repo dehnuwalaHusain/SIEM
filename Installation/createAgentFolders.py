@@ -78,7 +78,7 @@ def main() :
 	except errorOcc:
 		created_time = timeStamper ()
 		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + errorOcc + "\n")
-		print ("Check log for errors.\nExiting... Files un-copied to agent folder.")
+		print ("Check log for errors.\nExiting... Files not copied to agent folder.")
 		exit ()
 		
 	'''
