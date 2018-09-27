@@ -1,25 +1,24 @@
 '''
+[EDIT]
+Alright, so logging will not work here for exceptions. And that's because Python does not have any problems executing those commands on the terminal. When an error occurs, it's from the terminal itself. Need to find a way to find those exeptions and add it to log.  
+  
+
 To print the current directory you're in ( debugging )
 print (os.getcwd())
 
 To save the last chdir you made through script:
 os.system("/bin/bash")
-
-
 '''
-
 
 import os, datetime, time, logging
 
 LOG_FILENAME = 'installation.log'
 logging.basicConfig (filename = LOG_FILENAME, level = logging.INFO)
 
-
 def timeStamper () :
 	timestamp = time.time ()
 	created_time = datetime.datetime.fromtimestamp (timestamp).strftime ('%Y-%m-%d_%H:%M:%S')
 	return created_time
-
 
 def main() :
 	'''
@@ -53,10 +52,7 @@ def main() :
 		logging.info ( created_time + "\tFailed to create folder.\t" + errorOcc + "\n")
 		print ("Check log for errors.\nExiting... Agent folder not created.")
 		exit ()
-	
-	# To keep changes in directory in effect even after the program ends
-	# os.system ( '/bin/bash' )
-	
+		
 	'''
 	Move files into this directory
 	'''
@@ -78,7 +74,7 @@ def main() :
 	except errorOcc:
 		created_time = timeStamper ()
 		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + errorOcc + "\n")
-		print ("Check log for errors.\nExiting... Files not copied to agent folder.")
+		print ("Check log for errors.\nExiting... Files un-copied to agent folder.")
 		exit ()
 		
 	'''
@@ -101,7 +97,6 @@ def main() :
 		print ( "Check log for errors.\nExiting... .tar for agent folder not created." )
 		exit ()
 
-	
 if __name__ == '__main__':
 	main ()
 	exit ()
