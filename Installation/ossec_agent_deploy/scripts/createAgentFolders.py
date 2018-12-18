@@ -1,4 +1,9 @@
 '''
+
+TO UNINSTALL OSSEC:
+sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd
+
+
 [EDIT]
 Alright, so logging will not work here for exceptions. And that's because Python does not have any problems executing those commands on the terminal. When an error occurs, it's from the terminal itself. Need to find a way to find those exeptions and add it to log.  
   
@@ -10,9 +15,7 @@ To save the last chdir you made through script:
 os.system("/bin/bash")
 
 COMMAND LINE ARGUMENTS FOR THIS SCRIPT:
-python createAgentFolders.py [<username> <password> <agent_name> <client/agent IP address> <serverIP>.....]
-
-		... <server IP address>
+python createAgentFolders.py [<username> <agent_password> <agent_name> <client/agent IP address> <serverIP> <server_password>.....]
 
 
 '''
@@ -37,7 +40,7 @@ def main() :
 	username = "tempUsername"
 
 	# Password from webUI via cmd arguments
-	password = "root@12"
+	server_password = "root@12"
 
 	# Agent name from webUI via cmd arguments
 	agent_name = "tempAgentName"
@@ -52,17 +55,18 @@ def main() :
 	serverIP = "10.65.6.78"
 
 
-	if ( len ( sys.argv ) != 6 ):
+	if ( len ( sys.argv ) != 7 ):
 		created_time = timeStamper ()
 		logging.info ( created_time + "\tDid not receive the pre-required information from UI for installation." )
 		print ("Check log file for errors.")
 		exit ()
 	else: 
 		username = sys.argv [ 1 ]
-		password = sys.argv [ 2 ]
+		agent_password = sys.argv [ 2 ]
 		agent_name = sys.argv [ 3 ] 
 		IPadd = sys.argv [ 4 ]
 		serverIP = sys.argv [ 5 ]
+		server_password = sys.argv [ 6 ]
 		try :
 			ipaddress.ip_address ( IPadd )
 		except ValueError:
@@ -160,7 +164,7 @@ def main() :
 	# cp "-r" for copying folders
 	# cp "-p" for preserving permissions
 	try:
-		command = 'echo %s | sudo -S cp -r -p %s %s' % (password, folder_from_path, folder_to_path)
+		command = 'echo %s | sudo -S cp -r -p %s %s' % (server_password, folder_from_path, folder_to_path)
 		os.system ( command )
 		# Log
 		created_time = timeStamper ()
@@ -177,7 +181,7 @@ def main() :
 	Add information of agent to be added in the server ( manage_agents )
 	'''
 	try:
-		manageAgents ( agent_name, IPadd, password )
+		manageAgents ( agent_name, IPadd, server_password )
 		created_time = timeStamper ()
 		logging.info ( created_time + "\nAgent info added to server\n")
 	except:
@@ -190,7 +194,7 @@ def main() :
 	Copying the files over to the remote network
 	'''
 	try:
-		command = 'echo %s | sudo scp -r -p ossec-binary.tar %s' % (password, (username + "@" + IPadd + ":/home/" + username))
+		command = 'echo %s | sudo scp -r -p ossec-binary.tar %s' % (server_password, (username + "@" + IPadd + ":/home/" + username))
 		os.system ( command )
 		
 		# Log
@@ -208,8 +212,11 @@ def main() :
 	'''
 	try:
 		s = pxssh.pxssh()
-		s.login (IPadd, username, "root")
+		print ("Check215")
+		s.login (IPadd, username, agent_password)
+		print ("Check217")
 		s.sendline ('uptime')   # run a command
+		print ("check219")
 		s.prompt()             # match the prompt
 		print ( s.before )          # print everything before the prompt.
 		
@@ -221,17 +228,19 @@ def main() :
 		s.prompt()
 		print ( s.before )
 		
+		# At this time, the remote machine expects a password, this condition is identified and taken care of using s.expect
 		s.sendline ('sudo ./install.sh < input.in')
 		s.expect ('(?i)password.*:')
-		s.sendline("root")
+		s.sendline(agent_password)
 		s.prompt()
-		print ( s.before )
+		print ( s.before ) 
 		
 		s.logout()
-	except:
+	except Exception as e:
 		created_time = timeStamper ()
 		logging.info ( created_time + "\tError while installing.\t" + "\n")
 		print ("Check log for errors.\nExiting... Ossec not installed.")
+		print (e)
 		exit ()
 	
 if __name__ == '__main__':
