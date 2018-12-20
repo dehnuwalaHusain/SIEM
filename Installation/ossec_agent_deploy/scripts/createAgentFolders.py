@@ -3,7 +3,7 @@
 TO UNINSTALL OSSEC:
 sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd
 
-
+s
 [EDIT]
 Alright, so logging will not work here for exceptions. And that's because Python does not have any problems executing those commands on the terminal. When an error occurs, it's from the terminal itself. Need to find a way to find those exeptions and add it to log.  
   
@@ -15,7 +15,8 @@ To save the last chdir you made through script:
 os.system("/bin/bash")
 
 COMMAND LINE ARGUMENTS FOR THIS SCRIPT:
-python createAgentFolders.py [<username> <agent_password> <agent_name> <client/agent IP address> <serverIP> <server_password>.....]
+python createAgentFolders.py [<username> <agent_password> <agent_ID> <agent_name> <client/agent IP address>
+									 <serverIP> <server_password>]
 
 
 '''
@@ -23,6 +24,7 @@ python createAgentFolders.py [<username> <agent_password> <agent_name> <client/a
 import os, datetime, time, logging, sys, ipaddress
 from pexpect import pxssh
 from manage import manageAgents
+from copy_keys import keys
 
 LOG_FILENAME = 'installation.log'
 logging.basicConfig (filename = LOG_FILENAME, level = logging.INFO)
@@ -55,7 +57,7 @@ def main() :
 	serverIP = "10.65.6.78"
 
 
-	if ( len ( sys.argv ) != 7 ):
+	if ( len ( sys.argv ) != 8 ):
 		created_time = timeStamper ()
 		logging.info ( created_time + "\tDid not receive the pre-required information from UI for installation." )
 		print ("Check log file for errors.")
@@ -63,10 +65,11 @@ def main() :
 	else: 
 		username = sys.argv [ 1 ]
 		agent_password = sys.argv [ 2 ]
-		agent_name = sys.argv [ 3 ] 
-		IPadd = sys.argv [ 4 ]
-		serverIP = sys.argv [ 5 ]
-		server_password = sys.argv [ 6 ]
+		agent_ID = sys.argv [ 3 ]
+		agent_name = sys.argv [ 4 ] 
+		IPadd = sys.argv [ 5 ]
+		serverIP = sys.argv [ 6 ]
+		server_password = sys.argv [ 7 ]
 		try :
 			ipaddress.ip_address ( IPadd )
 		except ValueError:
@@ -130,8 +133,21 @@ def main() :
 	fileOb.write ("\n")
 	fileOb.close()
 
-	dir2 = "../"
-	os.chdir (dir2)
+	'''
+	Copy keys
+	'''
+	try:
+		keys ( agent_ID )
+		dir2 = "../"
+		os.chdir (dir2)
+	except Exception as e:
+		created_time = timeStamper ()
+		logging.info ( created_time + "\tError while copying client key.\t" + "\n")
+		print ("Check log for errors.\nExiting... Ossec not installed.")
+		print (e)
+		exit ()
+
+
 
 	'''
 	Converting to a zip file
@@ -194,7 +210,7 @@ def main() :
 	Copying the files over to the remote network
 	'''
 	try:
-		command = 'echo %s | sudo scp -r -p ossec-binary.tar %s' % (server_password, (username + "@" + IPadd + ":/home/" + username))
+		command = 'echo %s | sudo scp -r -p ossec-binary.tar %s' % ( server_password, (username + "@" + IPadd + ":/home/" + username))
 		os.system ( command )
 		
 		# Log
@@ -224,16 +240,44 @@ def main() :
 		s.prompt()
 		print ( s.before )
 
-		s.sendline ('cd ossec-hids-*')
-		s.prompt()
+		s.sendline ( 'pwd' )
+		s.prompt ()
 		print ( s.before )
-		
-		# At this time, the remote machine expects a password, this condition is identified and taken care of using s.expect
-		s.sendline ('sudo ./install.sh < input.in')
-		s.expect ('(?i)password.*:')
+
+		print ('231')
+		s.sendline ('sudo chmod -R a+rwx ossec-hids-*/')
+		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
 		s.prompt()
-		print ( s.before ) 
+		print ( s.before )
+		print ('237')
+		s.sendline ('cd ossec-hids-*')
+		s.prompt()	
+		print ( s.before )
+
+		# At this time, the remote machine expects a password, this condition is identified and taken care of using s.expect
+		s.sendline ('sudo sh ./install.sh < input.in')
+		#s.expect ('(?i)password.*:')
+		s.sendline(agent_password)
+		s.prompt()
+		print ( s.before )
+
+		s.sendline ( 'pwd' )
+		s.prompt ()
+		print ( s.before )
+
+		s.sendline ( 'ls' )
+		s.prompt ()
+		print ( s.before )
+
+
+		s.sendline ('sudo /var/ossec/bin/manage_agents < final_key.out')
+		s.prompt ()
+		print (s.before) 
+
+		s.sendline ( 'sudo /var/ossec/bin/ossec-control restart')
+		s.prompt ()
+		print (s.before)
 		
 		s.logout()
 	except Exception as e:
@@ -245,11 +289,11 @@ def main() :
 
 	'''
 	Delete the created folder
-	'''
+	
 	dir2 = "scripts/"
 	os.chdir ( dir2 )
 	os.rmdir ( folder_name )
-
+	'''
 	
 if __name__ == '__main__':
 	main ()

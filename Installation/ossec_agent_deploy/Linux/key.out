@@ -1,0 +1,33 @@
+
+
+****************************************
+* OSSEC HIDS v3.1.0 Agent manager.     *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+Available agents: 
+   ID: 004, Name: check, IP: 10.65.6.12
+   ID: 005, Name: mani, IP: 10.65.6.7
+Provide the ID of the agent to extract the key (or '\q' to quit): 
+Agent key information for '005' is: 
+MDA1IG1hbmkgMTAuNjUuNi43IGY2ZmUxZmMxNTFjNDI0YmZkMzYwY2U4Njg0ODQwYWYzZDZhMGI1NDdlOGZjNzQwNzlhZjBhOWYxMmFhOTZmOTU=
+
+** Press ENTER to return to the main menu.
+
+
+****************************************
+* OSSEC HIDS v3.1.0 Agent manager.     *
+* The following options are available: *
+****************************************
+   (A)dd an agent (A).
+   (E)xtract key for an agent (E).
+   (L)ist already added agents (L).
+   (R)emove an agent (R).
+   (Q)uit.
+Choose your action: A,E,L,R or Q: 
+manage_agents: Exiting.
