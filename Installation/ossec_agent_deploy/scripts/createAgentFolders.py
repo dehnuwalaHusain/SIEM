@@ -242,6 +242,14 @@ def main() :
 		print ("Check log for errors.\nExiting... Ossec not installed.")
 		print (e)
 		exit ()
+
+	'''
+	Delete the created folder
+	'''
+	dir2 = "scripts/"
+	os.chdir ( dir2 )
+	os.rmdir ( folder_name )
+
 	
 if __name__ == '__main__':
 	main ()
