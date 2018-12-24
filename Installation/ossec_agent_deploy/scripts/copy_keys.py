@@ -1,7 +1,7 @@
 import os, sys, logging
 #from createAgentFolders import timeStamper
 
-def retreive_key ( agent_ID ):
+def retreive_key ( agent_ID, password ):
 
 	try:
 		fileOb = open ("key_input.in", "w")
@@ -19,7 +19,8 @@ def retreive_key ( agent_ID ):
 		print (e)
 
 	try:
-		os.system ("sudo /var/ossec/bin/manage_agents < key_input.in > key.out ")
+		comm = "echo %s | sudo /var/ossec/bin/manage_agents < key_input.in > key.out " % (password)
+		os.system (comm)
 		os.system ("sudo /var/ossec/bin/ossec-control restart")
 #		log_time = timeStamper ()
 #		logging.info ( log_time + "\tContents extracted to file 'key.out'." )
@@ -56,7 +57,7 @@ def store_key ():
 	except Exception as e:
 		print ( e )
 
-def keys ( agent_ID ):
+def keys ( agent_ID, password ):
 
-	retreive_key ( agent_ID )
+	retreive_key ( agent_ID, password )
 	store_key ()
