@@ -21,18 +21,13 @@ python createAgentFolders.py [<username> <agent_password> <agent_ID> <agent_name
 
 '''
 
-import os, datetime, time, logging, sys, ipaddress
+import os, logging, sys, ipaddress, header, time
 from pexpect import pxssh
 from manage import manageAgents
 from copy_keys import keys
 
 LOG_FILENAME = 'installation.log'
 logging.basicConfig (filename = LOG_FILENAME, level = logging.INFO)
-
-def timeStamper () :
-	timestamp = time.time ()
-	created_time = datetime.datetime.fromtimestamp (timestamp).strftime ('%Y-%m-%d_%H:%M:%S')
-	return created_time
 
 def main() :
 	'''
@@ -58,7 +53,7 @@ def main() :
 
 
 	if ( len ( sys.argv ) != 8 ):
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tDid not receive the pre-required information from UI for installation." )
 		print ("Check log file for errors.")
 		exit ()
@@ -73,17 +68,17 @@ def main() :
 		try :
 			ipaddress.ip_address ( IPadd )
 		except ValueError:
-			created_time = timeStamper ()
+			created_time = header.timeStamper ()
 			logging.info ( created_time + "\tThe IP \'" + IPadd + "\' is not a valid IP address.")	
 			exit ()
 		try :
 			ipaddress.ip_address ( serverIP )
 		except ValueError:
-			created_time = timeStamper ()
+			created_time = header.timeStamper ()
 			logging.info ( created_time + "\tThe IP \'" + serverIP + "\' is not a valid IP address.")	
 			exit ()
 
-	created_time = timeStamper ()
+	created_time = header.timeStamper ()
 	logging.info ( created_time + "\tInitiating installation for machine with username \'" + username + "\' and IP \'" + IPadd +
 									"\' and assigning it (agent) the name \'" + agent_name + "\'")  
 
@@ -91,18 +86,19 @@ def main() :
 
 	'''
 	Making folder in the directory
+	Current directory: ../Installation/ossec_agent_deploy/scripts
 	'''
 	# foldername = agentName_timestamp
 	try:
-		created_time = timeStamper()
+		created_time = header.timeStamper()
 		folder_name = agent_name + '_' + created_time
 		os.mkdir ( folder_name )
 		# Log
-		created_time = timeStamper()
+		created_time = header.timeStamper()
 		logging.info ( created_time + "\tFolder \" "+ folder_name + "\" created\n")
-	except errorOcc:
-		created_time = timeStamper()
-		logging.info ( created_time + "\tFailed to create folder.\t" + errorOcc + "\n")
+	except Exception as e:
+		created_time = header.timeStamper()
+		logging.info ( created_time + "\tFailed to create folder.\t" + e + "\n")
 		print ("Check log for errors.\nExiting... Agent folder not created.")
 		exit ()
 		
@@ -112,6 +108,9 @@ def main() :
 	'''
 	dir2 = "../Linux/ossec-hids-2.8.1"
 	os.chdir (dir2)
+	'''
+	Current Directory: ../Installation/ossec_agent_deploy/Linux/ossec-hids-2.8.1
+	'''
 	fileOb = open ( "input.in", "w" )
 	# OSSEC language
 	fileOb.write ("en\n")
@@ -134,20 +133,45 @@ def main() :
 	fileOb.close()
 
 	'''
+	Add information of agent to be added in the server ( manage_agents )
+	'''
+	try:
+		dir2 = "../"
+		os.chdir (dir2)
+		'''
+		Current Directory: ../Installation/ossec_agent_deploy/Linux
+		'''
+		manageAgents ( agent_name, IPadd, server_password )
+		print (os.getcwd())
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\nAgent info added to server\n")
+	except Exception as e:
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFailed to add agent info to server.\t" + e + "\n")
+		print ("Check log for errors.\nExiting...")
+		exit ()
+
+	'''
 	Copy keys
 	'''
 	try:
-		keys ( agent_ID )
+		dir2 = "ossec-hids-2.8.1"
+		os.chdir ( dir2 )
+		'''
+		Current Directory: ../Installation/ossec_agent_deploy/Linux/ossec-hids-2.8.1
+		'''
+		keys ( agent_ID, server_password )
 		dir2 = "../"
-		os.chdir (dir2)
+		os.chdir ( dir2 )
+		'''
+		Current Directory: ../Installation/ossec_agent_deploy/Linux
+		'''
 	except Exception as e:
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tError while copying client key.\t" + "\n")
 		print ("Check log for errors.\nExiting... Ossec not installed.")
 		print (e)
 		exit ()
-
-
 
 	'''
 	Converting to a zip file
@@ -158,15 +182,13 @@ def main() :
 		
 		os.system ( command )	
 		# Log
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tAgent folder zipped.\n")
-	except:
-		created_time = timeStamper ()
+	except Exception as e:
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tFailed to create .tar file for agent folder.\t")
 		print ( "Check log for errors.\nExiting... .tar for agent folder not created." )
 		exit ()
-
-
 
 	'''
 	Move files into this directory
@@ -183,27 +205,14 @@ def main() :
 		command = 'echo %s | sudo -S cp -r -p %s %s' % (server_password, folder_from_path, folder_to_path)
 		os.system ( command )
 		# Log
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tFile copied\n")
 		
 		time.sleep (2)
-	except errorOcc:
-		created_time = timeStamper ()
-		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + errorOcc + "\n")
+	except Exception as e:
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + e + "\n")
 		print ("Check log for errors.\nExiting... Files un-copied to agent folder.")
-		exit ()
-	
-	'''
-	Add information of agent to be added in the server ( manage_agents )
-	'''
-	try:
-		manageAgents ( agent_name, IPadd, server_password )
-		created_time = timeStamper ()
-		logging.info ( created_time + "\nAgent info added to server\n")
-	except:
-		created_time = timeStamper ()
-		logging.info ( created_time + "\tFailed to add agent info to server.\t" + "\n")
-		print ("Check log for errors.\nExiting...")
 		exit ()
 
 	'''
@@ -214,12 +223,12 @@ def main() :
 		os.system ( command )
 		
 		# Log
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tFile copied to remote server.\n")
 
-	except ValueError:
-		created_time = timeStamper ()
-		logging.info ( created_time + "\tFailed to copy contents to remote system.\t" + errorOcc + "\n")
+	except Exception as e:
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFailed to copy contents to remote system.\t" + e + "\n")
 		print ("Check log for errors.\nExiting... Files un-copied to remote machine.")
 		exit ()
 	
@@ -281,7 +290,7 @@ def main() :
 		
 		s.logout()
 	except Exception as e:
-		created_time = timeStamper ()
+		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tError while installing.\t" + "\n")
 		print ("Check log for errors.\nExiting... Ossec not installed.")
 		print (e)
