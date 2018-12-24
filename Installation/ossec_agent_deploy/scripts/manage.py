@@ -1,4 +1,4 @@
-import os
+import os, header
 
 def manageAgents ( agent_name, IPadd, password ):
 
@@ -11,7 +11,7 @@ def manageAgents ( agent_name, IPadd, password ):
 	#os.system (dir2)
 	#print (os.getcwd())
 
-	fileOb = open ("input.in", "w")
+	fileOb = open ("manage_input.in", "w")
 	fileOb.write ("a\n")
 	fileOb.write (agent_name + "\n")
 	fileOb.write (IPadd + "\n")
@@ -19,8 +19,8 @@ def manageAgents ( agent_name, IPadd, password ):
 	fileOb.write ("y\n")
 	fileOb.close()
 
-	command = 'sudo /var/ossec/bin/manage_agents < input.in'
-	#command = "./manage_ag	ents"
+	command = 'echo %s | sudo /var/ossec/bin/manage_agents < manage_input.in' % (password)
+	#command = "./manage_agents"
 	os.system ( command )
 
 	os.system ("exit")
