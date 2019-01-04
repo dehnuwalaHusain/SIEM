@@ -178,6 +178,7 @@ def main() :
 	'''
 	try:
 		print ( os.getcwd() )
+		# remove 'v' -cf
 		command = 'tar -cvf ossec-binary.tar ossec-hids-2.8.1/'
 		
 		os.system ( command )	
@@ -217,31 +218,21 @@ def main() :
 
 	'''
 	Copying the files over to the remote network
-	'''
-	try:
-		command = 'echo %s | sudo scp -r -p ossec-binary.tar %s' % ( server_password, (username + "@" + IPadd + ":/home/" + username))
-		os.system ( command )
-		
-		# Log
-		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile copied to remote server.\n")
+	'''	
+	stat = True
+	stat = header.fetchFileSCP("ossec-binary.tar",username, IPadd, agent_password, None)
+	if stat:
+		print ("File Transferred successfully.")
+	else:
+		print ("Failure while copying files securely.")
 
-	except Exception as e:
-		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFailed to copy contents to remote system.\t" + e + "\n")
-		print ("Check log for errors.\nExiting... Files un-copied to remote machine.")
-		exit ()
-	
 	'''
 	Installing ossec on the remote system
 	'''
 	try:
 		s = pxssh.pxssh()
-		print ("Check215")
 		s.login (IPadd, username, agent_password)
-		print ("Check217")
 		s.sendline ('uptime')   # run a command
-		print ("check219")
 		s.prompt()             # match the prompt
 		print ( s.before )          # print everything before the prompt.
 		
