@@ -19,21 +19,21 @@ def timeStamper () :
 	created_time = datetime.datetime.fromtimestamp (timestamp).strftime ('%Y-%m-%d_%H:%M:%S')
 	return created_time
 
-def fetchFileSCP(args0, args1, args2, args3, child=None):
-	print ("Received Args:",child, args0, args1, args2, args3)
+def fetchFileSCP(file_path, username, IPadd, agent_password, child=None):
+	print ("Received Args:",child, file_path, username, IPadd, agent_password)
 	try:
 		if not child:
-			comm = args1 + "@" + args2 + ":/home/" + args1
-			child = pexpect.spawn( 'scp -r -p %s %s'%(args0, comm))
+			comm = username + "@" + IPadd + ":/home/" + username
+			child = pexpect.spawn( 'scp -r -p %s %s'%(file_path, comm))
 		res = child.expect( expectations )
 		print ("Child Exit Status :",child.exitstatus)
 		print  (res,"::",child.before," :After:",child.after)
 		if res == 0:
-			child.sendline(args3)
-			return fetchFileSCP(args0, args1, args2, args3, child)
+			child.sendline(agent_password)
+			return fetchFileSCP(file_path, username, IPadd, agent_password, child)
 		if res == 1:
 			child.sendline('yes')
-			return fetchFileSCP(args0, args1, args2, args3, child)
+			return fetchFileSCP(file_path, username, IPadd, agent_password, child)
 		if res == 2:
 			line = child.before
 			print ("Line:",line)
