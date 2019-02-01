@@ -5,6 +5,11 @@
 
 	Command Line argument:
 	python3 ServerInstall.py [<System password> <Password for Apache server>]
+	
+	To uninstall:
+	> rm -rf /usr/local/nagios
+	> sudo userdel nagios
+	> sudo groupdel nagios
 '''
 
 import os,logging,sys
@@ -16,7 +21,7 @@ def serverInstall():
 		exit()
 	'''
 	systemPassword = sys.argv[1]
-	command = "echo %s| sudo apt-get update"
+	command = "echo %s| sudo -S apt-get update"
 	os.system(command%(systemPassword))
 	#installing required softwares for nagios core installation
 	command = "sudo apt-get install -y autoconf gcc libc6 make wget unzip apache2 php libapache2-mod-php7.2 libgd-dev"
