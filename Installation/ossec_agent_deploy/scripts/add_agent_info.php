@@ -3,31 +3,40 @@
 //echo "CHECK";
 
 include('includes/connect.php');
+include('tabs.php');
 
 if (!empty($_POST)) {
 
 	if(isset( $_POST['sub'] )) {
 		$username = $_POST['username'];
 		$password = $_POST['password'];
-		$agentname = $_POST['agentname'];
+		//$agentname = $_POST['agentname'];
 		$IP = $_POST['ip'];
 		$OS_type = $_POST['select_os'];
 
-		echo $username."<br>".$password."<br>".$agentname."<br>".$IP."<br>".$OS_type;
-		
+		echo $username."<br>".$password."<br>".$IP."<br>".$OS_type;
+			
 		$result = mysqli_query( $conn, "SELECT count(*) as total from agentinfo");
 		$data = mysqli_fetch_assoc( $result );
-		//if( $data['total'] == 0 ) {
 			
-			$count = $data['total'] + 1;
-			$res = mysqli_query( $conn, "INSERT INTO agentinfo VALUES('$username','$password','$agentname','$IP','$OS_type',$count)");
-		//}
+		$count = $data['total'] + 1;
 		
-		//$res = mysqli_query( $conn, "INSERT INTO agentinfo VALUES('$username','$password','$agentname','$IP','$OS_type')");
+		if($count<10)
+			$count="00".(string)$count;
+
+		else if($count<100)
+			$count="0".(string)$count;
+		
+		echo "<br>".$count;
+
+		//$output = passthru('python3 pyt.py');
+		//echo $output;
+		//(username, password, agentname, IP, OSType, AgentId)
+		$res = mysqli_query( $conn, "INSERT INTO agentinfo VALUES('$username','$password','$count','$IP','$OS_type','$count')");
 		
 		if( !$res ) {
 			
-			echo "Could not add agent!";
+			echo "<script>alert('Could not add agent!');</script>";
 		}
 	}
 }
@@ -83,39 +92,23 @@ if (!empty($_POST)) {
 						<span class="focus-input100"></span>
 					</div>
 					
-					<div class="wrap-input100 validate-input m-b-16" data-validate = "Agent name is required">
+					<!--div class="wrap-input100 validate-input m-b-16" data-validate = "Agent name is required">
 						<input class="input100" type="text" name="agentname" placeholder="Agent Name">
 						<span class="focus-input100"></span>
-					</div>
+					</div-->
 					
-					
-					<div class="wrap-input100 validate-input m-b-16" data-validate = "IP is required">
-						<input class="input100" type="text" name="ip" placeholder="IP">
+					<div class="wrap-input100 validate-input m-b-16" data-validate = "IP is required" required>
+						<input class="input100" type="text" name="ip" placeholder="IP" pattern="(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" oninvalid="setCustomValidity('Please enter valid IP Address')" onchange="try{setCustomValidity('')}catch(e){}" >
 						<span class="focus-input100"></span>
 					</div>
 					
 					<div class="wrap-input100 validate-input m-b-16">
-						<select name="select_os" class="input100">
-							<option>--Select OS--</option>
+						<select name="select_os" class="input100" required oninvalid="setCustomValidity('Please select an Operating System')" onchange="try{setCustomValidity('')}catch(e){}" >
+							<option value="" style="color:red;" >Select OS</option>
 							<option>Windows</option>
 							<option>Ubuntu</option>
 						</select>
 					</div>
-					
-					<!--<div class="flex-sb-m w-full p-t-3 p-b-24">
-						<div class="contact100-form-checkbox">
-							<input class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me">
-							<label class="label-checkbox100" for="ckb1">
-								Remember me
-							</label>
-						</div>
-
-						<div>
-							<a href="#" class="txt1">
-								Forgot?
-							</a>
-						</div>
-					</div>-->
 
 					<div class="container-login100-form-btn m-t-17">
 						<button name="sub" id="sub" class="login100-form-btn">
@@ -123,7 +116,7 @@ if (!empty($_POST)) {
 						</button>
 					</div>
 				</form>
-				<form action="index.php" method="post">
+				<form action="index2.php" method="post">
 					<div class="container-login100-form-btn m-t-17">
 						<button class="login100-form-btn">
 							Show Agent List
