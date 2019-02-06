@@ -50,7 +50,7 @@ def installation ():
 	server_IP = sys.argv [ 4 ]
 	server_password = sys.argv [ 5 ]
 	agent_name = sys.argv [ 6 ]
-	"""	
+	
 	try :
 		ipaddress.ip_address ( agent_IP )
 	except ValueError:
@@ -70,28 +70,41 @@ def installation ():
 
 	# Copying installation files from server to the to-be-agent.
 	stat = True
-	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nagios-plugins-2.2.1.tar.gz", username, agent_IP, agent_password, None )
+	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nagios_binary.tar.gz", username, agent_IP, agent_password, None )
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nagios-plugins-2.2.1.tar.gz copied." )
+		logging.info ( created_time + "\tFile nagios_binary.tar.gz copied." )
 	else:
 		print ("Failure while copying files securely.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nagios-plugins-2.2.1.tar.gz copying failed." )
+		logging.info ( created_time + "\tFile nagios_binary.tar.gz copying failed." )
 		exit ()
 
 	stat = True
-	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nrpe-nrpe-3.2.1.tar.gz", username, agent_IP, agent_password, None )
+	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nrpe_binary.tar.gz", username, agent_IP, agent_password, None )
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nrpe-nrpe-3.2.1.tar.gz copied." )
+		logging.info ( created_time + "\tFile nrpe_binary.tar.gz copied." )
 	else:
 		print ("Failure while copying files securely.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nrpe-nrpe-3.2.1.tar.gz copying failed." )
+		logging.info ( created_time + "\tFile nrpe_binary.tar.gz copying failed." )
 		exit ()
+
+	stat = True
+	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/lib_package_input.in", username, agent_IP, agent_password, None )
+	if stat:
+		print ("File Transferred successfully.")
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFile lib_package_input.in copied." )
+	else:
+		print ("Failure while copying files securely.")
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFile lib_package_input.in copying failed." )
+		exit ()
+
 
 	'''
 	Installing ossec on the remote system
@@ -103,13 +116,13 @@ def installation ():
 		s.prompt()             # match the prompt
 		print ( s.before )          # print everything before the prompt.
 
-		s.sendline ('sudo apt install libssl-dev')
+		s.sendline ('sudo apt install libssl-dev < lib_package_input.in ')
 		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
 		
-		s.sendline ('tar xzf nagios-plugins-2.2.1.tar.gz')
+		s.sendline ('tar xzf nagios_binary.tar.gz')
 		s.prompt()
 		print ( s.before )
 
@@ -127,6 +140,7 @@ def installation ():
 		s.prompt()	
 		print ( s.before )
 
+		'''
 		# At this time, the remote machine expects a password, this condition is identified and taken care of using s.expect
 		s.sendline ('sudo ./configure')
 		#s.expect ('(?i)password.*:')
@@ -139,6 +153,7 @@ def installation ():
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
+		'''
 
 		s.sendline ('sudo make install')
 		#s.expect ('(?i)password.*:')
@@ -176,7 +191,7 @@ def installation ():
 		s.prompt()
 		print ( s.before )
 
-		s.sendline ('sudo apt install xinetd')
+		s.sendline ('sudo apt install xinetd < lib_package_input.in')
 		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
 		s.prompt()
@@ -187,7 +202,7 @@ def installation ():
 		s.prompt ()
 		print (s.before) 
 
-		s.sendline ( 'tar xzf nrpe-nrpe-3.2.1.tar.gz')
+		s.sendline ( 'tar xzf nrpe_binary.tar.gz')
 		s.prompt ()
 		print (s.before)
 
@@ -201,6 +216,7 @@ def installation ():
 		s.prompt()	
 		print ( s.before )
 
+		'''
 		s.sendline ('sudo ./configure')
 		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
@@ -212,6 +228,7 @@ def installation ():
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
+		'''
 		
 		s.sendline ('sudo make install-groups-users')
 		#s.expect ('(?i)password.*:')
@@ -323,7 +340,7 @@ def installation ():
 
 	# Add details to localhost.cfg
 	define_host ( server_password, agent_IP,  agent_name )
-	"""
+	
 	serv = add_basic_services.Service ()
 	serv.capture_parameters ( agent_name, username, server_password )
 	serv.add_service_CPU_Load ()
