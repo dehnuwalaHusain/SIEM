@@ -15,11 +15,11 @@ def manageAgents ( agent_name, IPadd, password ):
 	fileOb.write ("a\n")
 	fileOb.write (agent_name + "\n")
 	fileOb.write (IPadd + "\n")
-	fileOb.write ("\n")
+	fileOb.write (agent_name + "\n") #Agent ID same as Agent Name
 	fileOb.write ("y\n")
 	fileOb.close()
 
-	command = 'echo %s | sudo /var/ossec/bin/manage_agents < manage_input.in' % (password)
+	command = 'echo %s | sudo -S /var/ossec/bin/manage_agents < manage_input.in' % (password)
 	#command = "./manage_agents"
 	os.system ( command )
 

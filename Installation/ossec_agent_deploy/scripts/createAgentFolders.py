@@ -287,6 +287,7 @@ def main() :
 		print (e)
 		exit ()
 
+	print("OSSEC Agent installed.")
 	'''
 	Delete the created folder
 	
