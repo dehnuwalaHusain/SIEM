@@ -3,8 +3,6 @@
 TO UNINSTALL OSSEC:
 sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd
 
-s
-[EDIT]
 Alright, so logging will not work here for exceptions. And that's because Python does not have any problems executing those commands on the terminal. When an error occurs, it's from the terminal itself. Need to find a way to find those exeptions and add it to log.  
   
 
@@ -52,6 +50,12 @@ def main() :
 	serverIP = "10.65.6.78"
 
 
+	'''
+	Name of the ossec folder in ../Installation/ossec_agent_deploy/Linux/"
+	'''
+	ossec_folder = "ossec-hids-3.1.0"
+
+
 	if ( len ( sys.argv ) != 8 ):
 		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tDid not receive the pre-required information from UI for installation." )
@@ -92,6 +96,7 @@ def main() :
 	try:
 		created_time = header.timeStamper()
 		folder_name = agent_name + '_' + created_time
+		os.chdir("../../ossec_agent_deploy/scripts/")
 		os.mkdir ( folder_name )
 		# Log
 		created_time = header.timeStamper()
@@ -104,12 +109,46 @@ def main() :
 		
 
 	'''
-	Storing the required installation parameters into a file
+	Move ossec file into this directory and unpack
 	'''
-	dir2 = "../Linux/ossec-hids-2.8.1"
+	
+	dir2 =folder_name
 	os.chdir (dir2)
 	'''
-	Current Directory: ../Installation/ossec_agent_deploy/Linux/ossec-hids-2.8.1
+	Current Directory: ../Installation/ossec_agent_deploy/scripts/<<folder_name>>
+	'''
+	
+	# folder from path, (this path is where ossec binary files are stored)
+	folder_from_path = "../../Linux/" + ossec_folder + ".tar.gz"
+	# folder to path, (this path is where client's copy is to be stored)
+	folder_to_path = "."
+	# command would be scp instead of cp, to copy files over network
+	# cp "-r" for copying folders
+	# cp "-p" for preserving permissions
+	try:
+		command = 'echo %s | sudo -S cp -r -p %s %s' % (server_password, folder_from_path, folder_to_path)
+		os.system ( command )
+		command = 'tar xf ' + ossec_folder + '.tar.gz'
+		os.system ( command )
+		# Log
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFile copied\n")
+		
+		time.sleep (2)
+	except Exception as e:
+		created_time = header.timeStamper ()
+		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + e + "\n")
+		print ("Check log for errors.\nExiting... Files un-copied to agent folder.")
+		exit ()
+
+
+	'''
+	Storing the required installation parameters into a file
+	'''
+	dir2 = ossec_folder
+	os.chdir (dir2)
+	'''
+	Current Directory: ../Installation/ossec_agent_deploy/scripts/<<folder_name>>/<<ossec_folder>>
 	'''
 	fileOb = open ( "input.in", "w" )
 	# OSSEC language
@@ -139,7 +178,7 @@ def main() :
 		dir2 = "../"
 		os.chdir (dir2)
 		'''
-		Current Directory: ../Installation/ossec_agent_deploy/Linux
+		Current Directory: ../Installation/ossec_agent_deploy/scripts/<<folder_name>>
 		'''
 		manageAgents ( agent_name, IPadd, server_password )
 		print (os.getcwd())
@@ -147,7 +186,7 @@ def main() :
 		logging.info ( created_time + "\nAgent info added to server\n")
 	except Exception as e:
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFailed to add agent info to server.\t" + e + "\n")
+		logging.info ( created_time + "\tFailed to add agent info to server.\t" + str(e) + "\n")
 		print ("Check log for errors.\nExiting...")
 		exit ()
 
@@ -155,16 +194,16 @@ def main() :
 	Copy keys
 	'''
 	try:
-		dir2 = "ossec-hids-2.8.1"
+		dir2 = ossec_folder
 		os.chdir ( dir2 )
 		'''
-		Current Directory: ../Installation/ossec_agent_deploy/Linux/ossec-hids-2.8.1
+		Current Directory: ../Installation/ossec_agent_deploy/scripts/<<folder_name>>/<<ossec_folder>>
 		'''
 		keys ( agent_ID, server_password )
 		dir2 = "../"
 		os.chdir ( dir2 )
 		'''
-		Current Directory: ../Installation/ossec_agent_deploy/Linux
+		Current Directory: ../Installation/ossec_agent_deploy/scripts/<<folder_name>>
 		'''
 	except Exception as e:
 		created_time = header.timeStamper ()
@@ -179,7 +218,7 @@ def main() :
 	try:
 		print ( os.getcwd() )
 		# remove 'v' -cf
-		command = 'tar -cvf ossec-binary.tar ossec-hids-2.8.1/'
+		command = 'tar -cf ossec-binary.tar ' + ossec_folder + '/'
 		
 		os.system ( command )	
 		# Log
@@ -191,30 +230,6 @@ def main() :
 		print ( "Check log for errors.\nExiting... .tar for agent folder not created." )
 		exit ()
 
-	'''
-	Move files into this directory
-	'''
-	
-	# folder from path, (this path will be the server's path to ossec bin files)
-	folder_from_path = "ossec-binary.tar"
-	# folder to path, (this path will be the client's path to /var/ossec)
-	folder_to_path = "../scripts/" + folder_name + "/"
-	# command would be scp instead of cp, to copy files over network
-	# cp "-r" for copying folders
-	# cp "-p" for preserving permissions
-	try:
-		command = 'echo %s | sudo -S cp -r -p %s %s' % (server_password, folder_from_path, folder_to_path)
-		os.system ( command )
-		# Log
-		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile copied\n")
-		
-		time.sleep (2)
-	except Exception as e:
-		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFailed to copy contents to folder.\t" + e + "\n")
-		print ("Check log for errors.\nExiting... Files un-copied to agent folder.")
-		exit ()
 
 	'''
 	Copying the files over to the remote network
@@ -230,13 +245,13 @@ def main() :
 	Installing ossec on the remote system
 	'''
 	try:
-		s = pxssh.pxssh()
+		s = pxssh.pxssh(timeout=1000)
 		s.login (IPadd, username, agent_password)
 		s.sendline ('uptime')   # run a command
 		s.prompt()             # match the prompt
 		print ( s.before )          # print everything before the prompt.
 		
-		s.sendline ('tar xfv ossec-binary.tar')
+		s.sendline ('tar xf ossec-binary.tar')
 		s.prompt()
 		print ( s.before )
 
@@ -245,13 +260,15 @@ def main() :
 		print ( s.before )
 
 		print ('231')
-		s.sendline ('sudo chmod -R a+rwx ossec-hids-*/')
+		comm = "sudo chmod -R a+rwx " + ossec_folder + "/"
+		s.sendline (comm)
 		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
 		print ('237')
-		s.sendline ('cd ossec-hids-*')
+		comm = "cd " + ossec_folder
+		s.sendline (comm)
 		s.prompt()	
 		print ( s.before )
 
@@ -274,6 +291,11 @@ def main() :
 		s.sendline ('sudo /var/ossec/bin/manage_agents < final_key.out')
 		s.prompt ()
 		print (s.before) 
+		
+		#comm = "sudo chown -R " + username + " /var/ossec/"
+		#s.sendline (comm)
+		#s.prompt()
+		#print (s.before)
 
 		s.sendline ( 'sudo /var/ossec/bin/ossec-control restart')
 		s.prompt ()
