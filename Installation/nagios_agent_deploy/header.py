@@ -26,16 +26,16 @@ def timeStamper () :
 # ---------------------------------------------------
 
 # Take back up of configuration file before making changes to it.
-def backup_localhost_cfg ( server_password ):
+def backup_cfg ( server_password, file_name ):
 	comm = "echo %s | sudo -S mkdir /usr/local/nagios/etc/objects/temp" % ( server_password )
 	os.system ( comm )
 
-	comm = "echo %s | sudo -S cp /usr/local/nagios/etc/objects/localhost.cfg /usr/local/nagios/etc/objects/temp/" % ( server_password )
+	comm = "echo %s | sudo -S cp /usr/local/nagios/etc/objects/%s /usr/local/nagios/etc/objects/temp/" % ( server_password, file_name )
 	os.system ( comm )
 
 # Restore the back up in case "Total Error and Total Warnings" are not 0.
-def restore_localhost_cfg ( server_password ):
-	comm = "echo %s | sudo -S cp /usr/local/nagios/etc/objects/temp/localhost.cfg /usr/local/nagios/etc/objects/" % ( server_password )
+def restore_cfg ( server_password, file_name ):
+	comm = "echo %s | sudo -S cp /usr/local/nagios/etc/objects/temp/%s /usr/local/nagios/etc/objects/" % ( server_password, file_name )
 	os.system ( comm )
 
 # Delete the temp directory created for back up.
@@ -51,7 +51,7 @@ def delete_backup ( server_password ):
 # ---------------------------------------------------
 
 # Check if the changes are safe to save, by compiling the cfg file and checking errors.
-def check_errors ( script, service, server_password ):
+def check_errors ( script, service, server_password, file_name ):
 
 	comm = script.split ()
 
@@ -68,7 +68,7 @@ def check_errors ( script, service, server_password ):
 		print ("success.")
 		print ( str (stdout))
 	else:
-		restore_localhost_cfg ( server_password )
+		restore_cfg ( server_password, file_name )
 		delete_backup ( server_password )
 		print ( "An error occured, service not added." )
 		created_time = timeStamper ()

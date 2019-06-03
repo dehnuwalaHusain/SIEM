@@ -52,7 +52,7 @@ class Service:
 		logging.info ( created_time + "\tAdding service CPU Load for " + self.agent_name )
 
 		# Back-up existing cfg file before making any changes
-		header.backup_localhost_cfg ( self.server_password )
+		header.backup_cfg ( self.server_password, "localhost.cfg" )
 
 		f = open ("/usr/local/nagios/etc/objects/localhost.cfg", "a")
 		script = "\n# Adding service CPU Load for " + self.agent_name
@@ -64,7 +64,7 @@ class Service:
 
 		# Compile/check for errors with the changes
 		script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
-		header.check_errors ( script, "CPU_load", self.server_password )
+		header.check_errors ( script, "CPU_load", self.server_password, "localhost.cfg" )
 
 	def add_service_current_users ( self ):
 
@@ -72,7 +72,7 @@ class Service:
 		logging.info ( created_time + "\tAdding service Current Users for " + self.agent_name )
 
 		# Back-up existing cfg file before making any changes
-		header.backup_localhost_cfg ( self.server_password )
+		header.backup_cfg ( self.server_password, "localhost.cfg" )
 
 		f = open ( "/usr/local/nagios/etc/objects/localhost.cfg", "a" )
 		script = "\n# Adding service Current Users for " + self.agent_name
@@ -84,14 +84,14 @@ class Service:
 
 		# Compile/check for errors with the changes
 		script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
-		header.check_errors ( script, "Current Users", self.server_password )
+		header.check_errors ( script, "Current Users", self.server_password, "localhost.cfg" )
 
 	def add_service_total_processes ( self ):
 		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tAdding service Total Processes for " + self.agent_name )
 
 		# Back-up existing cfg file before making any changes
-		header.backup_localhost_cfg ( self.server_password )
+		header.backup_cfg ( self.server_password, "localhost.cfg" )
 
 		f = open ( "/usr/local/nagios/etc/objects/localhost.cfg", "a" )
 		script = "\n# Adding service Total Processes for " + self.agent_name
@@ -103,14 +103,14 @@ class Service:
 
 		# Compile/check for errors with the changesAn error
 		script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
-		header.check_errors ( script, "Total Processes", self.server_password )
+		header.check_errors ( script, "Total Processes", self.server_password, "localhost.cfg" )
 
 	def add_service_zombie_processes ( self ):
 		created_time = header.timeStamper ()
 		logging.info ( created_time + "\tAdding service Zombie Processes for " + self.agent_name )
 
 		# Back-up existing cfg file before making any changes
-		header.backup_localhost_cfg ( self.server_password )
+		header.backup_cfg ( self.server_password, "localhost.cfg" )
 
 		f = open ( "/usr/local/nagios/etc/objects/localhost.cfg", "a" )
 		script = "\n# Adding service Zombie Processes for " + self.agent_name
@@ -122,7 +122,7 @@ class Service:
 
 		# Compile/check for errors with the changes
 		script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
-		header.check_errors ( script, "Zombie Processes", self.server_password )
+		header.check_errors ( script, "Zombie Processes", self.server_password, "localhost.cfg" )
 
 '''
 serv = Service ()

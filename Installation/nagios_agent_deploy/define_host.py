@@ -15,7 +15,7 @@ def define_host ( server_password, agent_IP, agent_name ):
 		print ( "\n\nInvalid IP, AGENT INSTALLATION FAILED." )
 		exit ()
 
-	header.backup_localhost_cfg ( server_password )
+	header.backup_cfg ( server_password, "localhost.cfg" )
 
 	file = open ( "/usr/local/nagios/etc/objects/localhost.cfg", "a" )
 	script = "\n# Adding HOST " + agent_name + " at IP " + agent_IP + "#\n\n"
