@@ -114,7 +114,11 @@ if (!empty($_POST)) {
 						</button>
 					</div>
 				</form>
+<<<<<<< HEAD:Installation/server_system_deploy/WebUI/add_agent_info.php
 				<form action="index.php" method="post">
+=======
+				<form action="test_tabs1.php" method="post">
+>>>>>>> 4ae1c1fc136c81dc3f785b3caa33f8bcf1b29e9f:Installation/ossec_agent_deploy/scripts/add_agent_info.php
 					<div class="container-login100-form-btn m-t-17">
 						<button class="login100-form-btn">
 							Show Agent List

@@ -70,30 +70,41 @@ def installation ():
 
 	# Copying installation files from server to the to-be-agent.
 	print("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+<<<<<<< HEAD
 	print (os.system(pwd))
 	print ("Aaaaaaaaaaaaaaaaaaaaaaaa")
 	stat = True
 	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nagios_binary.tar.gz", username, agent_IP, agent_password, None )
+=======
+	#print (os.system(pwd))
+	print ("Aaaaaaaaaaaaaaaaaaaaaaaa")
+	stat = True
+	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nagios-plugins-2.2.1.tar.gz", username, agent_IP, agent_password, None )
+>>>>>>> 4ae1c1fc136c81dc3f785b3caa33f8bcf1b29e9f
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nagios_binary.tar.gz copied." )
+		logging.info ( created_time + "\tFile nagios-plugins-2.2.1.tar.gz copied." )
 	else:
 		print ("Failure while copying files securely.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nagios_binary.tar.gz copying failed." )
+		logging.info ( created_time + "\tFile nagios-plugins-2.2.1.tar.gz copying failed." )
 		exit ()
 
 	stat = True
+<<<<<<< HEAD
 	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nrpe_binary.tar.gz", username, agent_IP, agent_password, None )
+=======
+	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nrpe-nrpe-3.2.1.tar.gz", username, agent_IP, agent_password, None )
+>>>>>>> 4ae1c1fc136c81dc3f785b3caa33f8bcf1b29e9f
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nrpe_binary.tar.gz copied." )
+		logging.info ( created_time + "\tFile nrpe-nrpe-3.2.1.tar.gz copied." )
 	else:
 		print ("Failure while copying files securely.")
 		created_time = header.timeStamper ()
-		logging.info ( created_time + "\tFile nrpe_binary.tar.gz copying failed." )
+		logging.info ( created_time + "\tFile nrpe-nrpe-3.2.1.tar.gz copying failed." )
 		exit ()
 
 	stat = True
@@ -113,7 +124,7 @@ def installation ():
 	Installing nagios on the remote system
 	'''
 	try:
-		s = pxssh.pxssh ()
+		s = pxssh.pxssh (timeout=10000)
 		s.login ( agent_IP, username, agent_password)
 		s.sendline ('uptime')   # run a command
 		s.prompt()             # match the prompt
@@ -125,7 +136,7 @@ def installation ():
 		s.prompt()
 		print ( s.before )
 		
-		s.sendline ('tar xzf nagios_binary.tar.gz')
+		s.sendline ('tar xzf nagios-plugins-2.2.1.tar.gz')
 		s.prompt()
 		print ( s.before )
 
@@ -143,7 +154,6 @@ def installation ():
 		s.prompt()	
 		print ( s.before )
 
-		'''
 		# At this time, the remote machine expects a password, this condition is identified and taken care of using s.expect
 		s.sendline ('sudo ./configure')
 		#s.expect ('(?i)password.*:')
@@ -156,7 +166,6 @@ def installation ():
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
-		'''
 
 		s.sendline ('sudo make install')
 		#s.expect ('(?i)password.*:')
@@ -205,7 +214,7 @@ def installation ():
 		s.prompt ()
 		print (s.before) 
 
-		s.sendline ( 'tar xzf nrpe_binary.tar.gz')
+		s.sendline ( 'tar xzf nrpe-nrpe-3.2.1.tar.gz')
 		s.prompt ()
 		print (s.before)
 
@@ -219,7 +228,6 @@ def installation ():
 		s.prompt()	
 		print ( s.before )
 
-		'''
 		s.sendline ('sudo ./configure')
 		#s.expect ('(?i)password.*:')
 		s.sendline(agent_password)
@@ -231,7 +239,6 @@ def installation ():
 		s.sendline(agent_password)
 		s.prompt()
 		print ( s.before )
-		'''
 		
 		s.sendline ('sudo make install-groups-users')
 		#s.expect ('(?i)password.*:')
