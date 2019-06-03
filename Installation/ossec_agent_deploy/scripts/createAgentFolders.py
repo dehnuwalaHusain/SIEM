@@ -3,8 +3,6 @@
 TO UNINSTALL OSSEC:
 sudo rm -f /etc/init.d/ossec /etc/rc0.d/K20ossec /etc/rc1.d/K20ossec /etc/rc2.d/S20ossec /etc/rc3.d/S20ossec /etc/rc4.d/S20ossec /etc/rc5.d/S20ossec /etc/rc6.d/K20ossec; sudo rm -rf /var/ossec; sudo /usr/sbin/deluser ossec; sudo /usr/sbin/deluser ossecm; sudo /usr/sbin/deluser ossecr; sudo /usr/sbin/deluser ossecd; sudo /usr/sbin/delgroup ossec; sudo /usr/sbin/delgroup ossecd
 
-s
-[EDIT]
 Alright, so logging will not work here for exceptions. And that's because Python does not have any problems executing those commands on the terminal. When an error occurs, it's from the terminal itself. Need to find a way to find those exeptions and add it to log.  
   
 
@@ -179,7 +177,7 @@ def main() :
 	try:
 		print ( os.getcwd() )
 		# remove 'v' -cf
-		command = 'tar -cvf ossec-binary.tar ossec-hids-2.8.1/'
+		command = 'tar -cf ossec-binary.tar ossec-hids-2.8.1/'
 		
 		os.system ( command )	
 		# Log
@@ -236,7 +234,7 @@ def main() :
 		s.prompt()             # match the prompt
 		print ( s.before )          # print everything before the prompt.
 		
-		s.sendline ('tar xfv ossec-binary.tar')
+		s.sendline ('tar xf ossec-binary.tar')
 		s.prompt()
 		print ( s.before )
 

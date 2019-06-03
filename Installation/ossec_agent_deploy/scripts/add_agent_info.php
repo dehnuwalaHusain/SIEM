@@ -1,12 +1,10 @@
 <?php
+//include_once('test_tabs1.php');
 
 //echo "CHECK";
 
 include('includes/connect.php');
-//include('tabs.php');
-
 if (!empty($_POST)) {
-
 	if(isset( $_POST['sub'] )) {
 		$username = $_POST['username'];
 		$password = $_POST['password'];
@@ -116,7 +114,7 @@ if (!empty($_POST)) {
 						</button>
 					</div>
 				</form>
-				<form action="index.php" method="post">
+				<form action="test_tabs1.php" method="post">
 					<div class="container-login100-form-btn m-t-17">
 						<button class="login100-form-btn">
 							Show Agent List

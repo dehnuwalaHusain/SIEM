@@ -19,7 +19,7 @@ def retreive_key ( agent_ID, password ):
 		print (e)
 
 	try:
-		comm = "echo %s | sudo /var/ossec/bin/manage_agents < key_input.in > key.out " % (password)
+		comm = "echo %s | sudo -S /var/ossec/bin/manage_agents < key_input.in > key.out " % (password)
 		os.system (comm)
 		os.system ("sudo /var/ossec/bin/ossec-control restart")
 #		log_time = timeStamper ()

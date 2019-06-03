@@ -84,17 +84,6 @@ def main() :
 									"\' and assigning it (agent) the name \'" + agent_name + "\'")  
 
 
-
-
-
-
-
-
-
-
-
-
-
 	'''
 	Making folder in the directory
 	'''

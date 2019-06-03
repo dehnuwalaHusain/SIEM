@@ -4,10 +4,21 @@
 	By default password will be "nagiosadmin"
 
 	Command Line argument:
-	python3 ServerInstall.py [<System password> <Password for Apache server>]
+	python3 ServerInstall.py [<server's password> <to-be Password for Nagios server> <server's IP> <server's username>]
+	
+	To uninstall:
+	> rm -rf /usr/local/nagios
+	> sudo userdel nagios
+	> sudo groupdel nagios
+
+	# 
 '''
 
-import os,logging,sys
+import os, logging, sys
+from pexpect import pxssh
+sys.path.append ('../nagios_plugin_nrpe/')
+import header
+
 def serverInstall():
 	#Updating required dependancies
 	'''	
@@ -15,9 +26,12 @@ def serverInstall():
 		print ("No proper number of parameter found")
 		exit()
 	'''
-	systemPassword = sys.argv[1]
-	command = "echo %s| sudo apt-get update"
-	os.system(command%(systemPassword))
+	server_password = sys.argv[1]
+	nag_new_password = sys.argv[2]
+	server_IP = sys.argv[3]
+	server_username = sys.argv[4]
+	command = "echo %s | sudo -S apt-get update" %(server_password)
+	os.system(command)
 	#installing required softwares for nagios core installation
 	command = "sudo apt-get install -y autoconf gcc libc6 make wget unzip apache2 php libapache2-mod-php7.2 libgd-dev"
 	os.system(command)
@@ -73,9 +87,35 @@ def serverInstall():
 	command = "sudo ufw reload"
 	os.system(command)
 
+
+	##########################################
+	try:
+		s = pxssh.pxssh(timeout=1000)
+		s.login (server_IP, server_username, server_password)
+		s.sendline ('uptime')   # run a command
+		s.prompt()             # match the prompt
+		print ( s.before )          # print everything before the prompt.
+
+		comm = "sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin"
+		s.sendline (comm)
+		#s.expect ('(?i)password.*:')
+		s.sendline(server_password)
+		s.sendline(nag_new_password)
+		s.sendline(nag_new_password)
+		s.prompt()
+		print ( s.before )
+
+		s.logout ()
+
+	except Exception as e:
+		print (e)
+	##########################################
+
+	'''
 	#Creating Nagios user account
-	command = "sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin"
+	command = "sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin root"
 	os.system(command)
+	'''
 
 	#Reastarting web server
 	command = "sudo systemctl restart apache2.service"
@@ -104,4 +144,56 @@ def serverInstall():
 	command = "sudo make install"
 	os.system(command)
 
+	os.chdir ("/opt/lampp/htdocs/localSIEM_withtabs/Installation/server_system_deploy")
+	# Installing NRPE plugin
+	command = "sudo cp ../nagios_agent_deploy/nagios_plugin_nrpe/nrpe-nrpe-3.2.1.tar.gz ."
+	os.system (command)
+	command = "sudo tar zxf nrpe-nrpe-3.2.1.tar.gz"
+	os.system (command)
+	os.chdir ("nrpe-nrpe-3.2.1/")
+
+	command = "sudo ./configure"
+	os.system (command)
+
+	command = "sudo make check_nrpe"
+	os.system (command)
+
+	command = "sudo make install-plugin"
+	os.system (command)
+
+	# Changing configuration file for including NRPE command definition
+	header.backup_cfg ( server_password, "commands.cfg" )
+
+	f = open ("/usr/local/nagios/etc/objects/commands.cfg", "a")
+	script = "\n# Adding host command definition for nrpe"
+	f.write (script)
+
+	script = "\ndefine command {\n\tcommand_name\tcheck_nrpe\n\tcommand_line\t$USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$\n\t}\n"
+	f.write (script)
+	f.close ()
+
+	# Compile and check for errors:
+	script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
+	header.check_errors ( script, "Command definition", server_password, "commands.cfg")
+
+
+	# Changing configuration file for including host-box definition
+
+	header.backup_cfg ( server_password, "localhost.cfg")
+
+	f = open ("/usr/local/nagios/etc/objects/localhost.cfg", "a")
+	script = "\n# Adding host-box definition, NAME: linux-box\n"
+	f.write (script)
+
+	# ---------------------------------------------------
+	# IMPORTANT - this line defines the behavior of a host group. How often the checks must be made etc. Any user specific configuration must 
+	# be programmed to take place here.
+	# ---------------------------------------------------
+	script = "\ndefine host {\n\tname\tlinux-box\n\tuse\tgeneric-host\n\tcheck_period\t24x7\n\tcheck_interval\t5\n\tretry_interval\t1\n\tmax_check_attempts\t10\n\tcheck_command\tcheck-host-alive\n\tnotification_period\t24x7\n\tnotification_interval\t30\n\tnotification_options\td,r\n\tcontact_groups\tadmins\n\tregister\t0\n\t}\n"
+	f.write (script)
+	f.close ()
+
+	# Compile and check for errors
+	script = "sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg"
+	header.check_errors ( script, "Host definition", server_password, "localhost.cfg")
 serverInstall()
