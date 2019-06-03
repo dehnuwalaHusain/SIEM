@@ -69,8 +69,11 @@ def installation ():
 	logging.info ( created_time + "\tInitiating installation on " + username + " with IP " + agent_IP)
 
 	# Copying installation files from server to the to-be-agent.
+	print("aaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	print (os.system(pwd))
+	print ("Aaaaaaaaaaaaaaaaaaaaaaaa")
 	stat = True
-	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nagios_binary.tar.gz", username, agent_IP, agent_password, None )
+	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nagios_binary.tar.gz", username, agent_IP, agent_password, None )
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
@@ -82,7 +85,7 @@ def installation ():
 		exit ()
 
 	stat = True
-	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/nrpe_binary.tar.gz", username, agent_IP, agent_password, None )
+	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/nrpe_binary.tar.gz", username, agent_IP, agent_password, None )
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
@@ -94,7 +97,7 @@ def installation ():
 		exit ()
 
 	stat = True
-	stat = header.fetchFileSCP ( "nagios_plugin_nrpe/lib_package_input.in", username, agent_IP, agent_password, None )
+	stat = header.fetchFileSCP ( "/opt/lampp/htdocs/localSIEM_withtabs/Installation/nagios_agent_deploy/nagios_plugin_nrpe/lib_package_input.in", username, agent_IP, agent_password, None )
 	if stat:
 		print ("File Transferred successfully.")
 		created_time = header.timeStamper ()
@@ -107,7 +110,7 @@ def installation ():
 
 
 	'''
-	Installing ossec on the remote system
+	Installing nagios on the remote system
 	'''
 	try:
 		s = pxssh.pxssh ()
