@@ -51,6 +51,7 @@ def store_key ():
 				newFileOb.write ( currLine )
 				# confirm adding it?
 				newFileOb.write ( "y\n" )
+				newFileOb.write ( "q\n" )
 				newFileOb.close ()
 				foundKey = True
 

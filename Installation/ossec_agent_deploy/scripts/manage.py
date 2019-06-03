@@ -17,14 +17,12 @@ def manageAgents ( agent_name, IPadd, password ):
 	fileOb.write (IPadd + "\n")
 	fileOb.write (agent_name + "\n") #Agent ID same as Agent Name
 	fileOb.write ("y\n")
+	fileOb.write ("q\n")
 	fileOb.close()
 
 	command = 'echo %s | sudo -S /var/ossec/bin/manage_agents < manage_input.in' % (password)
+	os.system (command)
 	#command = "./manage_agents"
-	if "command not find" in os.system ( command ):
-		exit()
-	else:
-		os.system ("exit")
 	print ("done")
 
 #manageAgents("check", "10.65.6.7", "root@12")
